@@ -69,6 +69,10 @@ namespace KERBALISM
 			Lib.SetProcessEnabledDisabled(part, resource, broken ? false : running, capacity);
 		}
 
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Proc. Throttle")]
+		[UI_FloatRange(minValue = 0f, maxValue = 1f, stepIncrement = 0.05f)]
+		public float process_scale = 1.0f;
+
 		///<summary> Called by Configure.cs. Configures the controller to settings passed from the configure module</summary>
 		public void Configure(bool enable)
 		{
@@ -81,7 +85,7 @@ namespace KERBALISM
 				{
 					// add the resource
 					// - always add the specified amount, even in flight
-					Lib.AddResource(part, resource, (!broken && running) ? capacity : 0.0, capacity);
+					Lib.AddResource(part, resource, (!broken && running) ? (capacity * process_scale) : 0.0, capacity);
 				}
 			}
 			else
@@ -94,7 +98,7 @@ namespace KERBALISM
 		public void ReliablityEvent(bool breakdown)
 		{
 			broken = breakdown;
-			Lib.SetProcessEnabledDisabled(part, resource, broken ? false : running, capacity);
+			Lib.SetProcessEnabledDisabled(part, resource, broken ? false : running, capacity * process_scale);
 		}
 
 		public void Update()
@@ -126,7 +130,7 @@ namespace KERBALISM
 			
 			// switch status
 			running = value;
-			Lib.SetProcessEnabledDisabled(part, resource, running, capacity);
+			Lib.SetProcessEnabledDisabled(part, resource, running, capacity * process_scale);
 
 			// refresh VAB/SPH ui
 			if (Lib.IsEditor()) GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
