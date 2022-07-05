@@ -99,10 +99,10 @@ namespace KERBALISM
 			return harvester.rate * crew_gain * (abundance / harvester.abundance_rate);
 		}
 
-		private static void ResourceUpdate(Vessel v, Harvester harvester, double min_abundance, double elapsed_s)
+		private static void ResourceUpdate(Vessel v, Harvester harvester, double elapsed_s)
 		{
 			double abundance = SampleAbundance(v, harvester);
-			if (abundance > min_abundance)
+			if (abundance > harvester.min_abundance)
 			{
 				ResourceRecipe recipe = new ResourceRecipe(ResourceBroker.Harvester);
 				recipe.AddInput("ElectricCharge", harvester.ec_rate * elapsed_s);
@@ -120,7 +120,7 @@ namespace KERBALISM
 
 			if (deployed && running && (issue.Length == 0))
 			{
-				ResourceUpdate(vessel, this, min_abundance, Kerbalism.elapsed_s);
+				ResourceUpdate(vessel, this, Kerbalism.elapsed_s);
 			}
 		}
 
@@ -129,7 +129,7 @@ namespace KERBALISM
 		{
 			if (Lib.Proto.GetBool(m, "deployed") && Lib.Proto.GetBool(m, "running") && Lib.Proto.GetString(m, "issue").Length == 0)
 			{
-				ResourceUpdate(v, harvester, Lib.Proto.GetDouble(m, "min_abundance"), elapsed_s);
+				ResourceUpdate(v, harvester, elapsed_s);
 			}
 		}
 

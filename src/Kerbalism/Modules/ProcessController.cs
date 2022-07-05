@@ -15,6 +15,9 @@ namespace KERBALISM
 		[KSPField] public double capacity = 1.0;          // amount of associated pseudo-resource
 		[KSPField] public bool toggle = true;             // show the enable/disable toggle button
 
+		[KSPField] public bool scaleable = true;		  // show the power slider
+		//TODO: change to default-false
+
 		// persistence/config
 		// note: the running state doesn't need to be serialized, as it can be deduced from resource flow
 		// but we find useful to set running to true in the cfg node for some processes, and not others
@@ -60,6 +63,15 @@ namespace KERBALISM
 			// hide toggle if specified
 			Events["Toggle"].active = toggle;
 			Actions["Action"].active = toggle;
+			
+			if(!scaleable)
+			{
+				Fields["process_scale"].guiActive= false;
+				Fields["process_scale"].guiActiveEditor= false;
+				process_scale = 1.0f;
+			}
+			Fields["process_scale"].guiName = title;
+			Fields["process_scale"].OnValueModified += OnProcessScaleModified;
 
 			// deal with non-togglable processes
 			if (!toggle)
@@ -69,8 +81,8 @@ namespace KERBALISM
 			Lib.SetProcessEnabledDisabled(part, resource, broken ? false : running, capacity);
 		}
 
-		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Proc. Throttle")]
-		[UI_FloatRange(minValue = 0f, maxValue = 1f, stepIncrement = 0.05f)]
+		[KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "proc. scale", groupName = "Processes", groupDisplayName = "#KERBALISM_Group_Processes")]
+		[UI_FloatRange(minValue = 0f, maxValue = 1f, stepIncrement = 0.05f )]
 		public float process_scale = 1.0f;
 
 		///<summary> Called by Configure.cs. Configures the controller to settings passed from the configure module</summary>
@@ -121,6 +133,11 @@ namespace KERBALISM
 
 			// refresh VAB/SPH ui
 			if (Lib.IsEditor()) GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+		}
+
+		private void OnProcessScaleModified(object arg1)
+		{
+			SetRunning(running && !broken);
 		}
 
 		public void SetRunning(bool value)
